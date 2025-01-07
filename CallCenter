@@ -1,0 +1,59 @@
+select * from CallCenter;
+
+---- Data cleaning ---
+SET SQL_SAFE_UPDATES = 0;
+
+--- changing date format---
+UPDATE call_center SET call_timestamp = str_to_date(call_timestamp, "%m/%d/%Y");
+
+--- updating empty values to NUll ----
+UPDATE call_center SET csat_score = NULL
+WHERE csat_score = '';
+
+SET SQL_SAFE_UPDATES = 1;
+SELECT * FROM call_center LIMIT 10;
+
+--- Count of num of rows and num of columns in table ---
+SELECT COUNT(*) AS num_rows FROM call_center;
+
+SELECT COUNT(*) AS num_columns
+FROM information_schema.columns
+WHERE table_name = 'CallCenter' AND table_schema = 'CallCenterdata';
+
+--- to select distinct values in each column ----
+SELECT DISTINCT sentiment FROM CallCenter;
+SELECT DISTINCT city FROM CallCenter;
+SELECT DISTINCT call_center FROM CallCenter;
+
+--- to count and % from total of each distinct values in a column in call_center table ---
+select city,count(*) as count, count(*)*100.0/(Select count(*) from CallCenter)
+as percentage from CallCenter group by city;
+
+--- Call count of=n each day---
+select Dayname(call_timestamp) as day_of_week, count(*) as call_count from CallCenter 
+group by day_of_week order by call_count desc;
+
+---- Calculations ---
+select MIN(call_duration_in_minutes) as min_duration,
+MAX(call_duration_in_minutes) as max_duration,
+AVG(call_duration_in_minutes) as avg_duration from CallCenter;
+
+SELECT
+  MIN(csat_score) AS min_csat,
+  MAX(csat_score) AS max_csat,
+  ROUND(AVG(csat_score), 2) AS avg_csat
+FROM call_center
+WHERE csat_score <> 0; --- where cast_score is not equal to 0 ---
+
+SELECT call_center, response_time, COUNT(*) as count
+From call_centerdata.call_center GROUP BY 1,2  ORDER BY 1,3 DESC;
+
+SELECT
+  DATE(call_timestamp) AS call_day,
+  MAX(`call duration in minutes`) AS max_call_duration
+FROM call_center
+GROUP BY call_day
+ORDER BY call_day;
+
+
+
